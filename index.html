@@ -549,6 +549,9 @@ function findStock(code){
 }
 
 // ── PRICE FETCH ──
+// API 기본 URL (Vercel 서버 함수)
+const API_BASE = '/api/stock';
+
 // 미국 주식 목록
 const US_STOCKS = [
   {code:'AAPL',name:'Apple',market:'US'},{code:'MSFT',name:'Microsoft',market:'US'},
@@ -576,31 +579,13 @@ const US_STOCKS = [
 ];
 
 async function fetchPrice(code,market){
-  // 미국 주식은 코드 그대로, 한국은 .KS/.KQ 추가
-  const sym = market==='US' ? code : (market==='KOSPI'?code+'.KS':code+'.KQ');
-  const url='https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=1d';
-  const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(url);
+  const url = API_BASE+'?code='+encodeURIComponent(code)+'&market='+encodeURIComponent(market||'KOSPI');
   try{
-    const res=await fetch(proxy,{cache:'no-store'});
-    const outer=await res.json();
-    const d=JSON.parse(outer.contents);
-    const meta=d?.chart?.result?.[0]?.meta;
-    if(!meta) return null;
-    const price=meta.regularMarketPrice;
-    const prev=meta.previousClose||meta.chartPreviousClose||price;
-    const change=price-prev;
-    const isUS = !sym.endsWith('.KS') && !sym.endsWith('.KQ');
-    const round = isUS ? (n=>Math.round(n*100)/100) : Math.round;
-    return {
-      price: isUS ? parseFloat(price.toFixed(2)) : Math.round(price),
-      change: isUS ? parseFloat(change.toFixed(2)) : Math.round(change),
-      changeRate: parseFloat(((change/prev)*100).toFixed(2)),
-      open: isUS ? parseFloat((meta.regularMarketOpen||price).toFixed(2)) : Math.round(meta.regularMarketOpen||price),
-      high: isUS ? parseFloat((meta.regularMarketDayHigh||price).toFixed(2)) : Math.round(meta.regularMarketDayHigh||price),
-      low: isUS ? parseFloat((meta.regularMarketDayLow||price).toFixed(2)) : Math.round(meta.regularMarketDayLow||price),
-      volume: meta.regularMarketVolume||0,
-      isUS,
-    };
+    const res = await fetch(url, {cache:'no-store'});
+    if(!res.ok) return null;
+    const d = await res.json();
+    if(d.error) return null;
+    return d;
   }catch{return null;}
 }
 async function loadAllPrices(){
