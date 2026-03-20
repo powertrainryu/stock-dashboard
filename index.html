@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#070b12">
 <title>주식 AI 비서</title>
-<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;주식AI비서&quot;,&quot;short_name&quot;:&quot;주식AI&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#070b12&quot;,&quot;theme_color&quot;:&quot;#070b12&quot;}">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -19,9 +18,9 @@
   --radius:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;overflow-x:hidden;transition:all 0.3s;}
 
-/* ── AUTH SCREENS ── */
+/* AUTH */
 .auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 30% 50%,#0d2040,var(--bg) 65%);}
 .auth-box{width:360px;max-width:92vw;padding:48px 36px;background:var(--surface);border:1px solid var(--border);border-radius:24px;}
 .auth-logo{font-size:32px;font-weight:900;letter-spacing:-1.5px;margin-bottom:4px;background:linear-gradient(135deg,#4a9eff,#00e676);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
@@ -38,11 +37,11 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .btn-primary:hover{opacity:0.85;}
 .auth-error{font-size:12px;color:var(--down);margin-top:10px;text-align:center;min-height:18px;}
 
-/* ── APP ── */
+/* APP */
 #app{display:none;}
 
 /* HEADER */
-.header{position:sticky;top:0;z-index:100;background:rgba(7,11,18,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;}
+.header{position:sticky;top:0;z-index:100;background:rgba(7,11,18,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;transition:all 0.3s;}
 .header-left{display:flex;align-items:center;gap:12px;}
 .header-logo{font-size:16px;font-weight:900;letter-spacing:-0.5px;}
 .user-chip{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);}
@@ -53,6 +52,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .btn-icon{padding:6px 10px;background:none;border:1px solid var(--border2);color:var(--text2);border-radius:8px;cursor:pointer;font-size:11px;font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;white-space:nowrap;}
 .btn-icon:hover{border-color:var(--blue);color:var(--blue);}
 .btn-icon.danger:hover{border-color:var(--down);color:var(--down);}
+.btn-icon.active-mini{border-color:var(--blue);color:var(--blue);background:var(--blue)15;}
 
 /* TABS */
 .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);padding:0 20px;overflow-x:auto;}
@@ -61,16 +61,14 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700;}
 
 /* CONTENT */
-.content{padding:18px 20px;max-width:960px;margin:0 auto;}
+.content{padding:18px 20px;max-width:960px;margin:0 auto;transition:all 0.3s;}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
 
-/* ALERT BANNER */
+/* ALERT */
 .alert-banner{background:#ff980015;border:1px solid #ff980040;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--warn);display:none;align-items:center;gap:8px;}
 .alert-banner.show{display:flex;}
-
-/* NOTICE */
-.notice{background:var(--blue)10;border:1px solid var(--blue)25;border-radius:10px;padding:9px 14px;font-size:12px;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.notice{background:#4a9eff10;border:1px solid #4a9eff25;border-radius:10px;padding:9px 14px;font-size:12px;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 
 /* SEARCH */
 .search-wrap{position:relative;margin-bottom:16px;}
@@ -88,6 +86,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .badge{font-size:10px;padding:2px 6px;border-radius:5px;font-weight:600;}
 .badge.kospi{background:#4a9eff18;color:var(--blue);}
 .badge.kosdaq{background:#00e67618;color:var(--up);}
+.badge.direct{background:#ffc94718;color:var(--gold);}
 
 /* STOCK CARD */
 .stock-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:15px 16px;margin-bottom:9px;transition:all 0.35s;position:relative;}
@@ -101,7 +100,6 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .stock-name{font-weight:700;font-size:14px;}
 .stock-meta{font-size:11px;color:var(--text2);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
 .ai-summary{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5;font-style:italic;}
-.ai-summary.loading{color:var(--text3);}
 .card-right-group{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .card-right{text-align:right;}
 .stock-price{font-size:17px;font-weight:800;letter-spacing:-0.5px;font-family:var(--mono);}
@@ -114,7 +112,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .btn-sm{padding:4px 9px;border-radius:7px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:none;color:var(--text2);font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;white-space:nowrap;}
 .btn-sm:hover{border-color:var(--blue);color:var(--blue);}
 .btn-sm.danger:hover{border-color:var(--down);color:var(--down);}
-.btn-naver{padding:4px 9px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid #03c75a40;background:#03c75a10;color:#03c75a;font-family:'Noto Sans KR',sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:3px;transition:all 0.2s;}
+.btn-naver{padding:4px 9px;border-radius:7px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid #03c75a40;background:#03c75a10;color:#03c75a;font-family:'Noto Sans KR',sans-serif;text-decoration:none;display:inline-flex;align-items:center;transition:all 0.2s;}
 .btn-naver:hover{background:#03c75a20;}
 
 /* DETAIL */
@@ -130,7 +128,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .empty-title{font-size:15px;font-weight:600;margin-bottom:5px;}
 .empty-desc{font-size:12px;color:var(--text3);}
 
-/* SUMMARY CARDS */
+/* SUMMARY */
 .summary-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
 .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
 .s-label{font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;}
@@ -144,8 +142,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .modal-title{font-size:17px;font-weight:700;margin-bottom:4px;}
 .modal-sub{font-size:12px;color:var(--text2);margin-bottom:22px;}
 .modal-actions{display:flex;gap:8px;margin-top:20px;}
-.btn-cancel{padding:11px 18px;background:none;border:1px solid var(--border2);color:var(--text2);border-radius:10px;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;}
-.btn-cancel:hover{border-color:var(--text2);}
+.btn-cancel{padding:11px 18px;background:none;border:1px solid var(--border2);color:var(--text2);border-radius:10px;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif;}
 .btn-confirm{flex:1;padding:11px;background:linear-gradient(135deg,#1a5eff,#4a9eff);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
 
 /* NEWS */
@@ -171,22 +168,59 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .spinner{font-size:26px;animation:spin 1s linear infinite;display:inline-block;margin-bottom:10px;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* MINI WIDGET MODE */
-body.mini-mode{overflow:hidden;}
-body.mini-mode .header{height:44px;padding:0 12px;}
-body.mini-mode .header-logo{font-size:13px;}
-body.mini-mode .tabs{padding:0 12px;}
-body.mini-mode .tab{padding:9px 10px;font-size:11px;}
-body.mini-mode .content{padding:10px 12px;}
-body.mini-mode .stock-card{padding:10px 12px;margin-bottom:6px;}
+/* ── MINI WIDGET MODE ── */
+body.mini-mode{background:var(--bg);}
+body.mini-mode #app{
+  position:fixed; top:0; left:0;
+  width:320px; height:100vh;
+  border-right:1px solid var(--border2);
+  box-shadow:4px 0 30px rgba(0,0,0,0.5);
+  overflow-y:auto;
+  z-index:9999;
+}
+body.mini-mode .header{height:42px;padding:0 12px;}
+body.mini-mode .header-logo{font-size:12px;}
+body.mini-mode .user-chip{display:none;}
+body.mini-mode #last-updated{font-size:9px;}
+body.mini-mode .btn-icon{padding:4px 7px;font-size:10px;}
+body.mini-mode .tabs{padding:0 8px;}
+body.mini-mode .tab{padding:8px 10px;font-size:11px;}
+body.mini-mode .content{padding:8px 10px;}
+body.mini-mode .stock-card{padding:9px 10px;margin-bottom:5px;border-radius:10px;}
+body.mini-mode .stock-icon{width:30px;height:30px;font-size:11px;border-radius:8px;}
 body.mini-mode .stock-name{font-size:12px;}
+body.mini-mode .stock-meta{font-size:10px;}
 body.mini-mode .stock-price{font-size:14px;}
 body.mini-mode .stock-change{font-size:10px;}
 body.mini-mode .ai-summary{display:none;}
 body.mini-mode .card-actions{display:none;}
-body.mini-mode .summary-cards{grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
-body.mini-mode .s-value{font-size:14px;}
+body.mini-mode .card-detail{display:none!important;}
 body.mini-mode .notice{display:none;}
+body.mini-mode .alert-banner{font-size:10px;padding:6px 10px;}
+body.mini-mode .summary-cards{grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+body.mini-mode .summary-card{padding:10px 12px;border-radius:10px;}
+body.mini-mode .s-label{font-size:9px;}
+body.mini-mode .s-value{font-size:14px;}
+body.mini-mode .s-sub{display:none;}
+body.mini-mode .search-wrap{display:none;}
+body.mini-mode .news-row{display:none;}
+body.mini-mode .empty-state{padding:30px 10px;}
+body.mini-mode .empty-icon{font-size:28px;}
+body.mini-mode .empty-title{font-size:13px;}
+
+/* 미니모드 토글 버튼 */
+#mini-toggle-btn{
+  position:fixed; bottom:20px; right:20px;
+  width:44px; height:44px;
+  background:linear-gradient(135deg,#1a5eff,#4a9eff);
+  border:none; border-radius:50%;
+  color:#fff; font-size:18px;
+  cursor:pointer; z-index:10000;
+  box-shadow:0 4px 20px rgba(74,158,255,0.4);
+  display:none; align-items:center; justify-content:center;
+  transition:all 0.3s;
+}
+body.mini-mode #mini-toggle-btn{display:flex;}
 
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:var(--bg);}
@@ -195,13 +229,12 @@ body.mini-mode .notice{display:none;}
 @media(max-width:600px){
   .summary-cards{grid-template-columns:1fr 1fr;}
   .card-detail{grid-template-columns:1fr 1fr;}
-  .card-actions{flex-wrap:wrap;}
 }
 </style>
 </head>
 <body>
 
-<!-- ── LOGIN / SIGNUP ── -->
+<!-- LOGIN -->
 <div id="auth-screen" class="auth-screen">
   <div class="auth-box">
     <div class="auth-logo">📈 주식AI비서</div>
@@ -236,7 +269,7 @@ body.mini-mode .notice{display:none;}
   </div>
 </div>
 
-<!-- ── APP ── -->
+<!-- APP -->
 <div id="app">
   <div class="header">
     <div class="header-left">
@@ -258,14 +291,13 @@ body.mini-mode .notice{display:none;}
   </div>
 
   <div class="content">
-
     <!-- 관심종목 -->
     <div id="tab-watchlist" class="tab-panel active">
       <div class="alert-banner" id="alert-banner">⚠️ <span id="alert-text"></span></div>
-      <div class="notice">ℹ️ Yahoo Finance · 약 15~20분 지연 · 1분 자동 갱신</div>
+      <div class="notice">ℹ️ Yahoo Finance · 약 15~20분 지연 · 1분 자동 갱신 · 종목코드 직접 입력도 가능</div>
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input class="search-input" id="watch-search" placeholder="종목명 또는 코드 검색" oninput="searchStocks(this.value,'watch-dd')" autocomplete="off">
+        <input class="search-input" id="watch-search" placeholder="종목명, 코드 검색 또는 코드 직접 입력 (예: 087010)" oninput="searchStocks(this.value,'watch-dd')" autocomplete="off">
         <div class="dropdown" id="watch-dd"></div>
       </div>
       <div id="watchlist-container"></div>
@@ -292,7 +324,7 @@ body.mini-mode .notice{display:none;}
       </div>
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input class="search-input" id="hold-search" placeholder="보유종목 추가 — 종목명 또는 코드 검색" oninput="searchStocks(this.value,'hold-dd')" autocomplete="off">
+        <input class="search-input" id="hold-search" placeholder="종목명, 코드 검색 또는 코드 직접 입력 (예: 087010)" oninput="searchStocks(this.value,'hold-dd')" autocomplete="off">
         <div class="dropdown" id="hold-dd"></div>
       </div>
       <div id="holdings-container"></div>
@@ -312,11 +344,13 @@ body.mini-mode .notice{display:none;}
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- HOLDING MODAL -->
+<!-- 미니모드 닫기 버튼 -->
+<button id="mini-toggle-btn" onclick="toggleMini()" title="미니모드 끄기">✕</button>
+
+<!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-title">보유종목 추가</div>
@@ -343,8 +377,7 @@ body.mini-mode .notice{display:none;}
 <!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const firebaseConfig = {
   apiKey: "AIzaSyAZN4CPMFUJkaBqIXEqGeD7XM7rQdWWOM0",
   authDomain: "stock-dashboard-01.firebaseapp.com",
@@ -353,20 +386,14 @@ const firebaseConfig = {
   messagingSenderId: "471593186490",
   appId: "1:471593186490:web:abd511c8ee2c5f1f067e83"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-window._db = db;
-window._doc = doc;
-window._getDoc = getDoc;
-window._setDoc = setDoc;
-window._updateDoc = updateDoc;
-window._fbReady = true;
+window._db=db; window._doc=doc; window._getDoc=getDoc; window._setDoc=setDoc;
 window.dispatchEvent(new Event('fbReady'));
 </script>
 
 <script>
-// ── STOCK LIST ──
+// ── 종목 리스트 (확장) ──
 const STOCKS = [
   {code:'005930',name:'삼성전자',market:'KOSPI'},
   {code:'000660',name:'SK하이닉스',market:'KOSPI'},
@@ -385,6 +412,17 @@ const STOCKS = [
   {code:'028260',name:'삼성물산',market:'KOSPI'},
   {code:'096770',name:'SK이노베이션',market:'KOSPI'},
   {code:'034730',name:'SK',market:'KOSPI'},
+  {code:'010130',name:'고려아연',market:'KOSPI'},
+  {code:'003550',name:'LG',market:'KOSPI'},
+  {code:'017670',name:'SK텔레콤',market:'KOSPI'},
+  {code:'030200',name:'KT',market:'KOSPI'},
+  {code:'032830',name:'삼성생명',market:'KOSPI'},
+  {code:'009150',name:'삼성전기',market:'KOSPI'},
+  {code:'018260',name:'삼성에스디에스',market:'KOSPI'},
+  {code:'011200',name:'HMM',market:'KOSPI'},
+  {code:'010950',name:'S-Oil',market:'KOSPI'},
+  {code:'086790',name:'하나금융지주',market:'KOSPI'},
+  {code:'138040',name:'메리츠금융지주',market:'KOSPI'},
   {code:'247540',name:'에코프로비엠',market:'KOSDAQ'},
   {code:'086520',name:'에코프로',market:'KOSDAQ'},
   {code:'196170',name:'알테오젠',market:'KOSDAQ'},
@@ -396,216 +434,222 @@ const STOCKS = [
   {code:'357780',name:'솔브레인',market:'KOSDAQ'},
   {code:'214150',name:'클래시스',market:'KOSDAQ'},
   {code:'145020',name:'휴젤',market:'KOSDAQ'},
+  {code:'087010',name:'펩트론',market:'KOSDAQ'},
+  {code:'039030',name:'이오테크닉스',market:'KOSDAQ'},
+  {code:'112040',name:'위메이드',market:'KOSDAQ'},
+  {code:'293490',name:'카카오게임즈',market:'KOSDAQ'},
+  {code:'323410',name:'카카오뱅크',market:'KOSPI'},
+  {code:'352820',name:'하이브',market:'KOSPI'},
+  {code:'259960',name:'크래프톤',market:'KOSPI'},
+  {code:'251270',name:'넷마블',market:'KOSPI'},
+  {code:'036570',name:'엔씨소프트',market:'KOSPI'},
+  {code:'047810',name:'한국항공우주',market:'KOSPI'},
+  {code:'012450',name:'한화에어로스페이스',market:'KOSPI'},
+  {code:'000720',name:'현대건설',market:'KOSPI'},
+  {code:'006400',name:'삼성SDI',market:'KOSPI'},
+  {code:'051910',name:'LG화학',market:'KOSPI'},
+  {code:'009830',name:'한화솔루션',market:'KOSPI'},
+  {code:'000100',name:'유한양행',market:'KOSPI'},
+  {code:'128940',name:'한미약품',market:'KOSPI'},
+  {code:'326030',name:'SK바이오팜',market:'KOSPI'},
+  {code:'302440',name:'SK바이오사이언스',market:'KOSPI'},
 ];
 
 // ── STATE ──
-let currentUser = null;
-let userStore = {watchlist:[], holdings:[]};
-let stockPrices = {};
-let aiSummaries = {};
-let refreshTimer = null;
-let pendingCode = null;
-let isMini = false;
+let currentUser=null, userStore={watchlist:[],holdings:[]};
+let stockPrices={}, customStocks={}, aiSummaries={};
+let refreshTimer=null, pendingCode=null, isMini=false;
 
-// ── FIREBASE HELPERS ──
-async function fbLoad(user) {
-  const ref = window._doc(window._db, 'users', user);
-  const snap = await window._getDoc(ref);
-  if (snap.exists()) return snap.data();
-  return {watchlist:[], holdings:[], pw: null};
+// ── FIREBASE ──
+async function fbLoad(user){
+  const ref=window._doc(window._db,'users',user);
+  const snap=await window._getDoc(ref);
+  if(snap.exists()) return snap.data();
+  return {watchlist:[],holdings:[],pw:null,customStocks:{}};
 }
-async function fbSave(user, data) {
-  const ref = window._doc(window._db, 'users', user);
-  await window._setDoc(ref, data, {merge: true});
+async function fbSave(user,data){
+  const ref=window._doc(window._db,'users',user);
+  await window._setDoc(ref,data,{merge:true});
 }
 
 // ── AUTH ──
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', ['login','signup'][i]===tab));
-  document.getElementById('auth-login').style.display = tab==='login'?'block':'none';
-  document.getElementById('auth-signup').style.display = tab==='signup'?'block':'none';
-  document.getElementById('auth-error').textContent = '';
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',['login','signup'][i]===tab));
+  document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('auth-signup').style.display=tab==='signup'?'block':'none';
+  document.getElementById('auth-error').textContent='';
 }
-
-async function doLogin() {
-  const name = document.getElementById('login-name').value.trim();
-  const pw = document.getElementById('login-pw').value.trim();
-  if (!name || !pw) { showAuthError('닉네임과 비밀번호를 입력해주세요'); return; }
-  try {
-    const data = await fbLoad(name);
-    if (!data.pw) { showAuthError('존재하지 않는 계정이에요. 회원가입 해주세요!'); return; }
-    if (data.pw !== btoa(pw)) { showAuthError('비밀번호가 틀렸어요'); return; }
-    currentUser = name;
-    userStore = {watchlist: data.watchlist||[], holdings: data.holdings||[]};
+async function doLogin(){
+  const name=document.getElementById('login-name').value.trim();
+  const pw=document.getElementById('login-pw').value.trim();
+  if(!name||!pw){showAuthError('닉네임과 비밀번호를 입력해주세요');return;}
+  try{
+    const data=await fbLoad(name);
+    if(!data.pw){showAuthError('존재하지 않는 계정이에요. 회원가입 해주세요!');return;}
+    if(data.pw!==btoa(pw)){showAuthError('비밀번호가 틀렸어요');return;}
+    currentUser=name;
+    userStore={watchlist:data.watchlist||[],holdings:data.holdings||[]};
+    customStocks=data.customStocks||{};
     enterApp();
-  } catch(e) { showAuthError('오류가 발생했어요. 다시 시도해주세요'); }
+  }catch(e){showAuthError('오류가 발생했어요. 다시 시도해주세요');}
 }
-
-async function doSignup() {
-  const name = document.getElementById('signup-name').value.trim();
-  const pw = document.getElementById('signup-pw').value.trim();
-  if (!name) { showAuthError('닉네임을 입력해주세요'); return; }
-  if (pw.length < 4) { showAuthError('비밀번호는 4자 이상이어야 해요'); return; }
-  try {
-    const data = await fbLoad(name);
-    if (data.pw) { showAuthError('이미 사용중인 닉네임이에요'); return; }
-    await fbSave(name, {pw: btoa(pw), watchlist:[], holdings:[]});
-    currentUser = name;
-    userStore = {watchlist:[], holdings:[]};
+async function doSignup(){
+  const name=document.getElementById('signup-name').value.trim();
+  const pw=document.getElementById('signup-pw').value.trim();
+  if(!name){showAuthError('닉네임을 입력해주세요');return;}
+  if(pw.length<4){showAuthError('비밀번호는 4자 이상이어야 해요');return;}
+  try{
+    const data=await fbLoad(name);
+    if(data.pw){showAuthError('이미 사용중인 닉네임이에요');return;}
+    await fbSave(name,{pw:btoa(pw),watchlist:[],holdings:[],customStocks:{}});
+    currentUser=name; userStore={watchlist:[],holdings:[]}; customStocks={};
     enterApp();
-  } catch(e) { showAuthError('오류가 발생했어요. 다시 시도해주세요'); }
+  }catch(e){showAuthError('오류가 발생했어요. 다시 시도해주세요');}
 }
-
-function showAuthError(msg) { document.getElementById('auth-error').textContent = msg; }
-
-function enterApp() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('user-chip').textContent = '👤 ' + currentUser;
-  loadAllPrices().then(() => { renderWatchlist(); renderHoldings(); });
+function showAuthError(msg){document.getElementById('auth-error').textContent=msg;}
+function enterApp(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('user-chip').textContent='👤 '+currentUser;
+  loadAllPrices().then(()=>{renderWatchlist();renderHoldings();});
   startAutoRefresh();
 }
-
-function doLogout() {
+function doLogout(){
   clearInterval(refreshTimer);
-  currentUser = null; userStore = {watchlist:[], holdings:[]};
-  stockPrices = {}; aiSummaries = {};
-  document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-name').value = '';
-  document.getElementById('login-pw').value = '';
+  if(isMini) toggleMini();
+  currentUser=null; userStore={watchlist:[],holdings:[]};
+  stockPrices={}; aiSummaries={}; customStocks={};
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-name').value='';
+  document.getElementById('login-pw').value='';
+}
+async function saveStore(){
+  if(!currentUser) return;
+  await fbSave(currentUser,{watchlist:userStore.watchlist,holdings:userStore.holdings,customStocks});
 }
 
-// ── SAVE TO FIREBASE ──
-async function saveStore() {
-  if (!currentUser) return;
-  await fbSave(currentUser, {watchlist: userStore.watchlist, holdings: userStore.holdings});
+// ── 종목 찾기 (리스트 + 커스텀) ──
+function findStock(code){
+  return STOCKS.find(x=>x.code===code) || (customStocks[code] ? {code,...customStocks[code]} : null);
 }
 
 // ── PRICE FETCH ──
-async function fetchPrice(code, market) {
-  const sym = market==='KOSPI' ? code+'.KS' : code+'.KQ';
-  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=1d';
-  const proxy = 'https://api.allorigins.win/get?url='+encodeURIComponent(url);
-  try {
-    const res = await fetch(proxy, {cache:'no-store'});
-    const outer = await res.json();
-    const d = JSON.parse(outer.contents);
-    const meta = d?.chart?.result?.[0]?.meta;
-    if (!meta) return null;
-    const price = meta.regularMarketPrice;
-    const prev = meta.previousClose || meta.chartPreviousClose || price;
-    const change = price - prev;
+async function fetchPrice(code,market){
+  const sym=market==='KOSPI'?code+'.KS':code+'.KQ';
+  const url='https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=1d';
+  const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(url);
+  try{
+    const res=await fetch(proxy,{cache:'no-store'});
+    const outer=await res.json();
+    const d=JSON.parse(outer.contents);
+    const meta=d?.chart?.result?.[0]?.meta;
+    if(!meta) return null;
+    const price=meta.regularMarketPrice;
+    const prev=meta.previousClose||meta.chartPreviousClose||price;
+    const change=price-prev;
     return {
-      price: Math.round(price),
-      change: Math.round(change),
-      changeRate: parseFloat(((change/prev)*100).toFixed(2)),
-      open: Math.round(meta.regularMarketOpen||price),
-      high: Math.round(meta.regularMarketDayHigh||price),
-      low: Math.round(meta.regularMarketDayLow||price),
-      volume: meta.regularMarketVolume||0,
+      price:Math.round(price), change:Math.round(change),
+      changeRate:parseFloat(((change/prev)*100).toFixed(2)),
+      open:Math.round(meta.regularMarketOpen||price),
+      high:Math.round(meta.regularMarketDayHigh||price),
+      low:Math.round(meta.regularMarketDayLow||price),
+      volume:meta.regularMarketVolume||0,
     };
-  } catch { return null; }
+  }catch{return null;}
 }
-
-async function loadAllPrices() {
-  const codes = [...new Set([...userStore.watchlist, ...userStore.holdings.map(h=>h.code)])];
-  await Promise.all(codes.map(async code => {
-    const s = STOCKS.find(x=>x.code===code); if(!s) return;
-    const d = await fetchPrice(s.code, s.market);
-    if (d) stockPrices[code] = d;
+async function loadAllPrices(){
+  const codes=[...new Set([...userStore.watchlist,...userStore.holdings.map(h=>h.code)])];
+  await Promise.all(codes.map(async code=>{
+    const s=findStock(code); if(!s) return;
+    const d=await fetchPrice(s.code,s.market);
+    if(d) stockPrices[code]=d;
   }));
-  document.getElementById('last-updated').textContent =
+  document.getElementById('last-updated').textContent=
     new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
 }
-
-function startAutoRefresh() {
+function startAutoRefresh(){
   clearInterval(refreshTimer);
-  refreshTimer = setInterval(async () => {
-    await loadAllPrices();
-    renderWatchlist(); renderHoldings();
-  }, 60000);
+  refreshTimer=setInterval(async()=>{
+    await loadAllPrices(); renderWatchlist(); renderHoldings();
+  },60000);
 }
 
-// ── AI SUMMARY ──
-async function getAiSummary(code) {
-  if (aiSummaries[code]) return aiSummaries[code];
-  const s = STOCKS.find(x=>x.code===code);
-  const d = stockPrices[code];
-  if (!s || !d) return null;
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+// ── AI 요약 ──
+async function getAiSummary(code){
+  if(aiSummaries[code]) return aiSummaries[code];
+  const s=findStock(code); const d=stockPrices[code];
+  if(!s||!d) return null;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514', max_tokens:150,
+        model:'claude-sonnet-4-20250514',max_tokens:150,
         tools:[{type:'web_search_20250305',name:'web_search'}],
-        messages:[{role:'user',content:`${s.name}(${code}) 주식의 현재 상황을 한 줄(30자 이내)로 요약해줘. 현재가 ${d.price}원, 등락률 ${d.changeRate}%. 최신 정보 기반으로 핵심만. 예: "외국인 순매수 전환, 단기 반등 가능성"`}]
+        messages:[{role:'user',content:`${s.name}(${code}) 주식 현재 상황을 30자 이내 한 줄로 요약. 현재가 ${d.price}원 ${d.changeRate}%. 예: "외국인 순매수 전환, 단기 반등 가능성"`}]
       })
     });
-    const data = await res.json();
-    const text = data.content.map(i=>i.text||'').join('').trim();
-    aiSummaries[code] = text;
+    const data=await res.json();
+    const text=data.content.map(i=>i.text||'').join('').trim();
+    aiSummaries[code]=text;
     return text;
-  } catch { return null; }
+  }catch{return null;}
+}
+async function loadAiSummary(code){
+  const el=document.getElementById('ai-'+code); if(!el) return;
+  el.textContent='🤖 분석 중...';
+  const summary=await getAiSummary(code);
+  if(el&&summary){el.textContent='🤖 '+summary;}
 }
 
 // ── ALERTS ──
-function checkAlerts() {
-  const alerts = [];
-  userStore.watchlist.forEach(code => {
-    const d = stockPrices[code];
-    const s = STOCKS.find(x=>x.code===code);
-    if (d && d.changeRate <= -5) alerts.push(`⚠️ ${s?.name} ${d.changeRate}% 급락`);
+function checkAlerts(){
+  const alerts=[];
+  [...userStore.watchlist,...userStore.holdings.map(h=>h.code)].forEach(code=>{
+    const d=stockPrices[code]; const s=findStock(code);
+    if(d&&d.changeRate<=-5) alerts.push(`${s?.name} ${d.changeRate}% 급락`);
   });
-  userStore.holdings.forEach(h => {
-    const d = stockPrices[h.code];
-    const s = STOCKS.find(x=>x.code===h.code);
-    if (d && d.changeRate <= -5) alerts.push(`⚠️ ${s?.name} ${d.changeRate}% 급락`);
-    if (h.target && d && d.price >= h.target) alerts.push(`🎯 ${s?.name} 목표가 ${fmt(h.target)}원 도달!`);
+  userStore.holdings.forEach(h=>{
+    const d=stockPrices[h.code]; const s=findStock(h.code);
+    if(h.target&&d&&d.price>=h.target) alerts.push(`${s?.name} 목표가 도달!`);
   });
-  const banner = document.getElementById('alert-banner');
-  if (alerts.length) {
-    document.getElementById('alert-text').textContent = alerts.join(' · ');
-    banner.classList.add('show');
-  } else banner.classList.remove('show');
+  const banner=document.getElementById('alert-banner');
+  if(alerts.length){document.getElementById('alert-text').textContent=alerts.join(' · ');banner.classList.add('show');}
+  else banner.classList.remove('show');
 }
 
 // ── WATCHLIST ──
-function renderWatchlist() {
+function renderWatchlist(){
   checkAlerts();
-  const el = document.getElementById('watchlist-container');
-  if (!userStore.watchlist.length) {
-    el.innerHTML = emptyState('⭐','관심종목이 없습니다','위 검색창에서 종목을 추가해보세요'); return;
-  }
-  el.innerHTML = userStore.watchlist.map(code => {
-    const s = STOCKS.find(x=>x.code===code); if(!s) return '';
-    const d = stockPrices[code];
-    return buildWatchCard(s, d);
+  const el=document.getElementById('watchlist-container');
+  if(!userStore.watchlist.length){el.innerHTML=emptyState('⭐','관심종목이 없습니다','검색창에서 종목명, 코드, 또는 종목코드를 직접 입력해보세요');return;}
+  el.innerHTML=userStore.watchlist.map(code=>{
+    const s=findStock(code); if(!s) return '';
+    return buildWatchCard(s,stockPrices[code]);
   }).join('');
 }
-
-async function addToWatchlist(code) {
-  if (userStore.watchlist.includes(code)) { closeDD(); return; }
+async function addToWatchlist(code,name,market){
+  if(userStore.watchlist.includes(code)){closeDD();return;}
+  // 커스텀 종목이면 저장
+  if(!STOCKS.find(x=>x.code===code)){
+    customStocks[code]={name:name||code,market:market||'KOSPI'};
+  }
   userStore.watchlist.push(code);
   await saveStore();
-  const s = STOCKS.find(x=>x.code===code);
-  fetchPrice(s.code,s.market).then(d=>{if(d)stockPrices[code]=d; renderWatchlist();});
+  const s=findStock(code);
+  fetchPrice(s.code,s.market).then(d=>{if(d)stockPrices[code]=d;renderWatchlist();});
   closeDD();
 }
-async function removeFromWatchlist(code) {
-  userStore.watchlist = userStore.watchlist.filter(c=>c!==code);
+async function removeFromWatchlist(code){
+  userStore.watchlist=userStore.watchlist.filter(c=>c!==code);
   await saveStore(); renderWatchlist();
 }
 
 // ── HOLDINGS ──
-function renderHoldings() {
-  let ti=0, te=0;
-  userStore.holdings.forEach(h=>{
-    const d=stockPrices[h.code];
-    ti+=h.buyPrice*h.qty; te+=(d?d.price:h.buyPrice)*h.qty;
-  });
-  const tp=te-ti, tr=ti>0?((tp/ti)*100).toFixed(2):0;
+function renderHoldings(){
+  let ti=0,te=0;
+  userStore.holdings.forEach(h=>{const d=stockPrices[h.code];ti+=h.buyPrice*h.qty;te+=(d?d.price:h.buyPrice)*h.qty;});
+  const tp=te-ti,tr=ti>0?((tp/ti)*100).toFixed(2):0;
   const has=userStore.holdings.length>0;
   document.getElementById('total-eval').textContent=has?fmt(te)+'원':'-';
   document.getElementById('total-invest').textContent=has?fmt(ti)+'원':'-';
@@ -614,17 +658,14 @@ function renderHoldings() {
   pe.className='s-value '+(tp>=0?'up':'down');
   document.getElementById('total-rate').textContent=has?(tr>=0?'+':'')+tr+'%':'-';
   const el=document.getElementById('holdings-container');
-  if(!userStore.holdings.length){el.innerHTML=emptyState('💼','보유종목이 없습니다','위 검색창에서 종목을 추가해보세요');return;}
-  el.innerHTML=userStore.holdings.map(h=>{
-    const s=STOCKS.find(x=>x.code===h.code);if(!s)return'';
-    return buildHoldingCard(s,stockPrices[h.code],h);
-  }).join('');
+  if(!userStore.holdings.length){el.innerHTML=emptyState('💼','보유종목이 없습니다','검색창에서 종목을 추가해보세요');return;}
+  el.innerHTML=userStore.holdings.map(h=>{const s=findStock(h.code);if(!s)return'';return buildHoldingCard(s,stockPrices[h.code],h);}).join('');
 }
-
-function openModal(code) {
+function openModal(code,name,market){
   pendingCode=code;
-  const s=STOCKS.find(x=>x.code===code);
-  document.getElementById('modal-stock-name').textContent=s.name+' ('+code+')';
+  if(!STOCKS.find(x=>x.code===code)&&name){customStocks[code]={name,market:market||'KOSPI'};}
+  const s=findStock(code);
+  document.getElementById('modal-stock-name').textContent=(s?.name||code)+' ('+code+')';
   const ex=userStore.holdings.find(h=>h.code===code);
   document.getElementById('modal-buy').value=ex?ex.buyPrice:'';
   document.getElementById('modal-qty').value=ex?ex.qty:'';
@@ -642,7 +683,7 @@ async function confirmHolding(){
   if(idx>=0){userStore.holdings[idx]={...userStore.holdings[idx],buyPrice:buy,qty,target};}
   else userStore.holdings.push({code:pendingCode,buyPrice:buy,qty,target});
   await saveStore(); closeModal();
-  const s=STOCKS.find(x=>x.code===pendingCode);
+  const s=findStock(pendingCode);
   fetchPrice(s.code,s.market).then(d=>{if(d)stockPrices[s.code]=d;renderHoldings();});
 }
 async function removeHolding(code){
@@ -664,14 +705,14 @@ function buildWatchCard(s,d){
     <div class="detail-item"><div class="detail-label">저가</div><div class="detail-value down">${fmt(d.low)}</div></div>
     <div class="detail-item"><div class="detail-label">거래량</div><div class="detail-value">${fmtVol(d.volume)}</div></div>
   </div>`:'';
-  return `<div class="stock-card ${isAlert?'alert-card':''}" onclick="toggleDetail('${detId}')">
+  return `<div class="stock-card${isAlert?' alert-card':''}" onclick="toggleDetail('${detId}')">
     <div class="card-top">
       <div class="card-left">
         <div class="stock-icon">${s.name[0]}</div>
         <div>
-          <div class="stock-name">${isAlert?'⚠️ ':''} ${s.name}</div>
+          <div class="stock-name">${isAlert?'⚠️ ':''}${s.name}</div>
           <div class="stock-meta"><span>${s.code}</span><span class="badge ${s.market.toLowerCase()}">${s.market}</span></div>
-          <div class="ai-summary loading" id="ai-${s.code}">🤖 분석 중...</div>
+          <div class="ai-summary" id="ai-${s.code}">🤖 AI요약 버튼을 눌러보세요</div>
         </div>
       </div>
       <div class="card-right-group">
@@ -690,17 +731,17 @@ function buildWatchCard(s,d){
 
 function buildHoldingCard(s,d,h){
   const cur=d?d.price:h.buyPrice;
-  const eval_=cur*h.qty, inv=h.buyPrice*h.qty, profit=eval_-inv;
+  const eval_=cur*h.qty,inv=h.buyPrice*h.qty,profit=eval_-inv;
   const rate=((profit/inv)*100).toFixed(2);
-  const isUp=profit>=0; const cls=isUp?'up':'down';
+  const isUp=profit>=0;const cls=isUp?'up':'down';
   const naver='https://finance.naver.com/item/main.naver?code='+s.code;
   const targetHit=h.target&&d&&d.price>=h.target;
-  return `<div class="stock-card ${targetHit?'flash-up':''}">
+  return `<div class="stock-card${targetHit?' flash-up':''}">
     <div class="card-top">
       <div class="card-left">
         <div class="stock-icon">${s.name[0]}</div>
         <div>
-          <div class="stock-name">${targetHit?'🎯 ':''} ${s.name}</div>
+          <div class="stock-name">${targetHit?'🎯 ':''}${s.name}</div>
           <div class="stock-meta"><span>${s.code}</span><span class="badge ${s.market.toLowerCase()}">${s.market}</span><span>${h.qty}주 · 매입 ${fmt(h.buyPrice)}원</span>${h.target?`<span>목표 ${fmt(h.target)}원</span>`:''}</div>
         </div>
       </div>
@@ -725,33 +766,46 @@ function buildHoldingCard(s,d,h){
     </div>
   </div>`;
 }
-
-async function loadAiSummary(code) {
-  const el = document.getElementById('ai-'+code);
-  if (!el) return;
-  el.textContent = '🤖 분석 중...';
-  el.className = 'ai-summary loading';
-  const summary = await getAiSummary(code);
-  if (el && summary) {
-    el.textContent = '🤖 ' + summary;
-    el.className = 'ai-summary';
-  }
-}
-
 function toggleDetail(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
 
-// ── SEARCH ──
+// ── SEARCH (종목코드 직접 입력 지원) ──
 function searchStocks(q,ddId){
   const dd=document.getElementById(ddId);
   if(!q.trim()){dd.classList.remove('show');return;}
-  const res=STOCKS.filter(s=>s.name.includes(q)||s.code.includes(q)).slice(0,6);
-  if(!res.length){dd.classList.remove('show');return;}
   const isHold=ddId==='hold-dd';
+
+  // 리스트에서 검색
+  const res=STOCKS.filter(s=>s.name.includes(q)||s.code.includes(q)).slice(0,5);
+
+  // 6자리 숫자 코드 직접 입력 감지
+  const isDirectCode=/^\d{5,6}$/.test(q.trim());
+  const directCode=q.trim().padStart(6,'0');
+  const alreadyInList=STOCKS.find(x=>x.code===directCode);
+
+  let directHtml='';
+  if(isDirectCode&&!alreadyInList){
+    directHtml=`<div class="dropdown-item" onclick="${isHold?`openModal('${directCode}','${directCode}','KOSPI')`:`addToWatchlist('${directCode}','${directCode}','KOSPI')`}">
+      <div>
+        <div class="d-name">코드: ${directCode}</div>
+        <div class="d-meta">직접 입력 · KOSPI로 조회</div>
+      </div>
+      <button class="btn-sm"><span class="badge direct">직접입력</span></button>
+    </div>
+    <div class="dropdown-item" onclick="${isHold?`openModal('${directCode}','${directCode}','KOSDAQ')`:`addToWatchlist('${directCode}','${directCode}','KOSDAQ')`}">
+      <div>
+        <div class="d-name">코드: ${directCode}</div>
+        <div class="d-meta">직접 입력 · KOSDAQ으로 조회</div>
+      </div>
+      <button class="btn-sm"><span class="badge kosdaq">KOSDAQ</span></button>
+    </div>`;
+  }
+
+  if(!res.length&&!directHtml){dd.classList.remove('show');return;}
   dd.innerHTML=res.map(s=>`
-    <div class="dropdown-item" onclick="${isHold?`openModal('${s.code}')`:`addToWatchlist('${s.code}')`}">
+    <div class="dropdown-item" onclick="${isHold?`openModal('${s.code}')`:`addToWatchlist('${s.code}','${s.name}','${s.market}')`}">
       <div><div class="d-name">${s.name}</div><div class="d-meta">${s.code} · <span class="badge ${s.market.toLowerCase()}">${s.market}</span></div></div>
       <button class="btn-sm">${isHold?'+ 추가':'+ 관심'}</button>
-    </div>`).join('');
+    </div>`).join('')+directHtml;
   dd.classList.add('show');
 }
 function closeDD(){
@@ -774,7 +828,7 @@ async function searchNews(){
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',max_tokens:2000,
         tools:[{type:'web_search_20250305',name:'web_search'}],
-        messages:[{role:'user',content:`"${q}" 관련 한국 주식 최신 뉴스 5개를 검색하고 각각을 주가 관점에서 분석해서 JSON 배열로만 응답해. 설명 없이 JSON만. 형식: [{"title":"제목","summary":"2줄 요약","sentiment":"positive/negative/neutral","impact":"주가에 미치는 영향 한줄","time":"시간"}]`}]
+        messages:[{role:'user',content:`"${q}" 관련 한국 주식 최신 뉴스 5개 검색 후 JSON만 응답. 형식: [{"title":"제목","summary":"2줄 요약","sentiment":"positive/negative/neutral","impact":"주가 영향 한줄","time":"시간"}]`}]
       })
     });
     const data=await res.json();
@@ -804,16 +858,15 @@ function switchTab(name){
 function toggleMini(){
   isMini=!isMini;
   document.body.classList.toggle('mini-mode',isMini);
-  document.getElementById('mini-btn').textContent=isMini?'🔳 전체':'🔲 미니';
+  const btn=document.getElementById('mini-btn');
+  btn.textContent=isMini?'🔳 전체':'🔲 미니';
+  btn.classList.toggle('active-mini',isMini);
 }
 
 // ── UTILS ──
 function fmt(n){return Math.round(n).toLocaleString('ko-KR');}
 function fmtVol(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(0)+'K';return n?.toString()||'-';}
 function emptyState(icon,title,desc){return`<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><div class="empty-desc">${desc}</div></div>`;}
-
-// Wait for Firebase
-window.addEventListener('fbReady', ()=>{ console.log('Firebase ready!'); });
 </script>
 </body>
 </html>
