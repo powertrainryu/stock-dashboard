@@ -86,6 +86,7 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 .badge{font-size:10px;padding:2px 6px;border-radius:5px;font-weight:600;}
 .badge.kospi{background:#4a9eff18;color:var(--blue);}
 .badge.kosdaq{background:#00e67618;color:var(--up);}
+.badge.us{background:#ffc94718;color:var(--gold);}
 .badge.direct{background:#ffc94718;color:var(--gold);}
 
 /* STOCK CARD */
@@ -304,7 +305,7 @@ body.mini-mode #mini-toggle-btn{display:flex;}
       <div class="notice">ℹ️ Yahoo Finance · 약 15~20분 지연 · 1분 자동 갱신 · 종목코드 직접 입력도 가능</div>
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input class="search-input" id="watch-search" placeholder="종목명, 코드 검색 또는 코드 직접 입력 (예: 087010)" oninput="searchStocks(this.value,'watch-dd')" autocomplete="off">
+        <input class="search-input" id="watch-search" placeholder="한국/미국 종목 검색 (예: 삼성전자, 프로티나, NVDA, TSLA)" oninput="searchStocks(this.value,'watch-dd')" autocomplete="off">
         <div class="dropdown" id="watch-dd"></div>
       </div>
       <div id="watchlist-container"></div>
@@ -331,7 +332,7 @@ body.mini-mode #mini-toggle-btn{display:flex;}
       </div>
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input class="search-input" id="hold-search" placeholder="종목명, 코드 검색 또는 코드 직접 입력 (예: 087010)" oninput="searchStocks(this.value,'hold-dd')" autocomplete="off">
+        <input class="search-input" id="hold-search" placeholder="한국/미국 종목 검색 (예: 삼성전자, 프로티나, NVDA, TSLA)" oninput="searchStocks(this.value,'hold-dd')" autocomplete="off">
         <div class="dropdown" id="hold-dd"></div>
       </div>
       <div id="holdings-container"></div>
@@ -544,12 +545,39 @@ async function saveStore(){
 
 // ── 종목 찾기 (리스트 + 커스텀) ──
 function findStock(code){
-  return STOCKS.find(x=>x.code===code) || (customStocks[code] ? {code,...customStocks[code]} : null);
+  return STOCKS.find(x=>x.code===code) || US_STOCKS.find(x=>x.code===code) || (customStocks[code]?{code,...customStocks[code]}:null);
 }
 
 // ── PRICE FETCH ──
+// 미국 주식 목록
+const US_STOCKS = [
+  {code:'AAPL',name:'Apple',market:'US'},{code:'MSFT',name:'Microsoft',market:'US'},
+  {code:'GOOGL',name:'Alphabet (Google)',market:'US'},{code:'AMZN',name:'Amazon',market:'US'},
+  {code:'NVDA',name:'NVIDIA',market:'US'},{code:'META',name:'Meta',market:'US'},
+  {code:'TSLA',name:'Tesla',market:'US'},{code:'NFLX',name:'Netflix',market:'US'},
+  {code:'AMD',name:'AMD',market:'US'},{code:'INTC',name:'Intel',market:'US'},
+  {code:'ORCL',name:'Oracle',market:'US'},{code:'CRM',name:'Salesforce',market:'US'},
+  {code:'ADBE',name:'Adobe',market:'US'},{code:'QCOM',name:'Qualcomm',market:'US'},
+  {code:'AVGO',name:'Broadcom',market:'US'},{code:'TXN',name:'Texas Instruments',market:'US'},
+  {code:'PYPL',name:'PayPal',market:'US'},{code:'UBER',name:'Uber',market:'US'},
+  {code:'SPOT',name:'Spotify',market:'US'},{code:'SHOP',name:'Shopify',market:'US'},
+  {code:'JPM',name:'JPMorgan Chase',market:'US'},{code:'BAC',name:'Bank of America',market:'US'},
+  {code:'GS',name:'Goldman Sachs',market:'US'},{code:'V',name:'Visa',market:'US'},
+  {code:'MA',name:'Mastercard',market:'US'},{code:'WMT',name:'Walmart',market:'US'},
+  {code:'COST',name:'Costco',market:'US'},{code:'NKE',name:'Nike',market:'US'},
+  {code:'DIS',name:'Disney',market:'US'},{code:'SBUX',name:'Starbucks',market:'US'},
+  {code:'SPY',name:'S&P 500 ETF',market:'US'},{code:'QQQ',name:'나스닥 ETF',market:'US'},
+  {code:'ARKK',name:'ARK Innovation ETF',market:'US'},{code:'SOXL',name:'반도체 3x ETF',market:'US'},
+  {code:'TQQQ',name:'나스닥 3x ETF',market:'US'},{code:'PLTR',name:'Palantir',market:'US'},
+  {code:'HOOD',name:'Robinhood',market:'US'},{code:'COIN',name:'Coinbase',market:'US'},
+  {code:'MSTR',name:'MicroStrategy',market:'US'},{code:'SMCI',name:'Super Micro',market:'US'},
+  {code:'ARM',name:'ARM Holdings',market:'US'},{code:'ASML',name:'ASML',market:'US'},
+  {code:'TSM',name:'TSMC',market:'US'},{code:'BABA',name:'Alibaba',market:'US'},
+];
+
 async function fetchPrice(code,market){
-  const sym=market==='KOSPI'?code+'.KS':code+'.KQ';
+  // 미국 주식은 코드 그대로, 한국은 .KS/.KQ 추가
+  const sym = market==='US' ? code : (market==='KOSPI'?code+'.KS':code+'.KQ');
   const url='https://query1.finance.yahoo.com/v8/finance/chart/'+sym+'?interval=1d&range=1d';
   const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(url);
   try{
@@ -561,13 +589,17 @@ async function fetchPrice(code,market){
     const price=meta.regularMarketPrice;
     const prev=meta.previousClose||meta.chartPreviousClose||price;
     const change=price-prev;
+    const isUS = !sym.endsWith('.KS') && !sym.endsWith('.KQ');
+    const round = isUS ? (n=>Math.round(n*100)/100) : Math.round;
     return {
-      price:Math.round(price), change:Math.round(change),
-      changeRate:parseFloat(((change/prev)*100).toFixed(2)),
-      open:Math.round(meta.regularMarketOpen||price),
-      high:Math.round(meta.regularMarketDayHigh||price),
-      low:Math.round(meta.regularMarketDayLow||price),
-      volume:meta.regularMarketVolume||0,
+      price: isUS ? parseFloat(price.toFixed(2)) : Math.round(price),
+      change: isUS ? parseFloat(change.toFixed(2)) : Math.round(change),
+      changeRate: parseFloat(((change/prev)*100).toFixed(2)),
+      open: isUS ? parseFloat((meta.regularMarketOpen||price).toFixed(2)) : Math.round(meta.regularMarketOpen||price),
+      high: isUS ? parseFloat((meta.regularMarketDayHigh||price).toFixed(2)) : Math.round(meta.regularMarketDayHigh||price),
+      low: isUS ? parseFloat((meta.regularMarketDayLow||price).toFixed(2)) : Math.round(meta.regularMarketDayLow||price),
+      volume: meta.regularMarketVolume||0,
+      isUS,
     };
   }catch{return null;}
 }
@@ -746,7 +778,7 @@ async function removeHolding(code){
 function buildWatchCard(s,d){
   const isUp=d&&d.changeRate>=0;
   const cls=d?(isUp?'up':'down'):'neutral';
-  const changeStr=d?(isUp?'▲ +':'▼ ')+Math.abs(d.changeRate)+'% ('+(isUp?'+':'')+fmt(d.change)+')':'-';
+  const changeStr=d?fmtChange(d.change,d.changeRate,d.isUS):'-';
   const isAlert=d&&d.changeRate<=-5;
   const naver='https://finance.naver.com/item/main.naver?code='+s.code;
   const detId='det-w-'+s.code;
@@ -768,7 +800,7 @@ function buildWatchCard(s,d){
       </div>
       <div class="card-right-group">
         <div class="card-right">
-          <div class="stock-price ${isAlert?'warn-price':''}">${d?fmt(d.price)+'원':'조회중'}</div>
+          <div class="stock-price ${isAlert?'warn-price':''}">${d?fmtPrice(d.price,d.isUS):'조회중'}</div>
           <div class="stock-change ${cls}">${changeStr}</div>
         </div>
         <div class="card-actions">
@@ -783,6 +815,7 @@ function buildWatchCard(s,d){
 function buildHoldingCard(s,d,h){
   const {lots,totalQty,totalInvest,avgPrice}=calcHolding(h);
   const cur=d?d.price:avgPrice;
+  const isUS=d?.isUS||findStock(h.code)?.market==='US';
   const evalAmt=cur*totalQty, profit=evalAmt-totalInvest;
   const rate=((profit/totalInvest)*100).toFixed(2);
   const isUp=profit>=0; const cls=isUp?'up':'down';
@@ -797,7 +830,7 @@ function buildHoldingCard(s,d,h){
     return `<div class="lot-item">
       <div class="lot-info">${l.qty}주 @ <span class="lot-price">${fmt(l.buyPrice)}원</span></div>
       <div style="display:flex;align-items:center;gap:8px">
-        ${d?`<span class="lot-profit ${lCls}">${lProfit>=0?'+':''}${fmt(lProfit)}원 (${lProfit>=0?'+':''}${lRate}%)</span>`:''}
+        ${d?`<span class="lot-profit ${lCls}">${lProfit>=0?'+':''}${d.isUS?'$'+Math.abs(lProfit).toFixed(2):fmt(Math.abs(lProfit))+'원'} (${lProfit>=0?'+':''}${lRate}%)</span>`:''}
         <button class="btn-sm danger" onclick="event.stopPropagation();removeLot('${s.code}',${i})">삭제</button>
       </div>
     </div>`;
@@ -819,8 +852,8 @@ function buildHoldingCard(s,d,h){
       </div>
       <div class="card-right-group">
         <div class="card-right">
-          <div class="stock-price">${fmt(evalAmt)}원</div>
-          <div class="stock-change ${cls}">${isUp?'+':''}${fmt(profit)}원 (${isUp?'+':''}${rate}%)</div>
+          <div class="stock-price">${fmtPrice(evalAmt,isUS)}</div>
+          <div class="stock-change ${cls}">${isUp?'+':''}${isUS?'$'+Math.abs(profit).toFixed(2):fmt(Math.abs(profit))+'원'} (${isUp?'+':''}${rate}%)</div>
           ${d?`<div class="stock-change ${d.changeRate>=0?'up':'down'}">${d.changeRate>=0?'▲':'▼'} ${Math.abs(d.changeRate)}%</div>`:''}
         </div>
         <div class="card-actions">
@@ -831,9 +864,9 @@ function buildHoldingCard(s,d,h){
       </div>
     </div>
     <div class="card-detail open" style="margin-top:10px">
-      <div class="detail-item"><div class="detail-label">현재가</div><div class="detail-value">${fmt(cur)}</div></div>
-      <div class="detail-item"><div class="detail-label">평가금액</div><div class="detail-value">${fmt(evalAmt)}</div></div>
-      <div class="detail-item"><div class="detail-label">매입금액</div><div class="detail-value">${fmt(totalInvest)}</div></div>
+      <div class="detail-item"><div class="detail-label">현재가</div><div class="detail-value">${fmtPrice(cur,isUS)}</div></div>
+      <div class="detail-item"><div class="detail-label">평가금액</div><div class="detail-value">${fmtPrice(evalAmt,isUS)}</div></div>
+      <div class="detail-item"><div class="detail-label">매입금액</div><div class="detail-value">${fmtPrice(totalInvest,isUS)}</div></div>
       <div class="detail-item"><div class="detail-label">수익률</div><div class="detail-value ${cls}">${isUp?'+':''}${rate}%</div></div>
     </div>
     <div class="lots-list" id="${lotsId}">
@@ -853,7 +886,8 @@ function searchStocks(q,ddId){
   clearTimeout(_sTmr);
   if(!q.trim()){dd.classList.remove('show');return;}
   // 로컬 목록에서 먼저 빠르게
-  const local=STOCKS.filter(s=>s.name.includes(q)||s.code.includes(q)).slice(0,4);
+  const allStocks=[...STOCKS,...US_STOCKS];
+  const local=allStocks.filter(s=>s.name.toLowerCase().includes(q.toLowerCase())||s.code.toLowerCase().includes(q.toLowerCase())).slice(0,5);
   const isHold=ddId==='hold-dd';
   if(local.length){
     dd.innerHTML=local.map(s=>makeDdItem(s,isHold)).join('')+'<div style="padding:8px 16px;font-size:11px;color:var(--text3)">🔍 더 검색 중...</div>';
@@ -862,11 +896,19 @@ function searchStocks(q,ddId){
     dd.innerHTML='<div style="padding:12px 16px;font-size:12px;color:var(--text3)">🔍 검색 중...</div>';
     dd.classList.add('show');
   }
-  // 코드 직접 입력
+  // 코드 직접 입력 - 한국(숫자6자리) 또는 미국(영문 티커)
   if(/^\d{5,6}$/.test(q.trim())){
     const c=q.trim().padStart(6,'0');
     dd.innerHTML=[{code:c,name:c+' (KOSPI)',market:'KOSPI'},{code:c,name:c+' (KOSDAQ)',market:'KOSDAQ'}].map(s=>makeDdItem(s,isHold)).join('');
     return;
+  }
+  if(/^[A-Za-z]{1,5}$/.test(q.trim())){
+    const c=q.trim().toUpperCase();
+    const found=US_STOCKS.find(s=>s.code===c);
+    if(found){
+      dd.innerHTML=makeDdItem(found,isHold);
+      return;
+    }
   }
   // AI 검색 (0.5초 디바운스)
   _sTmr=setTimeout(()=>aiSearch(q,ddId,isHold,local),500);
@@ -879,7 +921,7 @@ async function aiSearch(q,ddId,isHold,localRes){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',max_tokens:600,
-        messages:[{role:'user',content:`한국 주식 종목 "${q}" 검색. JSON 배열만 응답. 설명 없이 JSON만. 없으면[]. 형식:[{"code":"6자리코드","name":"종목명","market":"KOSPI또는KOSDAQ"}] 최대8개`}]
+        messages:[{role:'user',content:`주식 종목 "${q}" 검색. 한국 주식(KOSPI/KOSDAQ)과 미국 주식(US) 모두 포함. JSON 배열만 응답. 설명없이 JSON만. 없으면[]. 형식:[{"code":"종목코드","name":"종목명","market":"KOSPI또는KOSDAQ또는US"}] 최대8개. 미국주식 코드는 AAPL,TSLA 같은 티커심볼.`}]
       })
     });
     const data=await res.json();
@@ -964,6 +1006,15 @@ function toggleMini(){
 
 // ── UTILS ──
 function fmt(n){return Math.round(n).toLocaleString('ko-KR');}
+function fmtPrice(n, isUS){
+  if(isUS) return '$'+parseFloat(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return fmt(n)+'원';
+}
+function fmtChange(change, changeRate, isUS){
+  const sign = changeRate>=0?'▲ +':'▼ ';
+  const chStr = isUS ? '$'+Math.abs(change).toFixed(2) : fmt(Math.abs(change))+'원';
+  return sign+Math.abs(changeRate)+'% ('+chStr+')';
+}
 function fmtVol(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(0)+'K';return n?.toString()||'-';}
 function emptyState(icon,title,desc){return`<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><div class="empty-desc">${desc}</div></div>`;}
 
