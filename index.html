@@ -118,6 +118,13 @@ body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-seri
 /* DETAIL */
 .card-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);grid-template-columns:repeat(4,1fr);gap:8px;}
 .card-detail.open{display:grid;}
+/* 분할매수 내역 */
+.lots-list{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.lots-list.open{display:block;}
+.lot-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg);border-radius:8px;margin-bottom:5px;font-size:12px;}
+.lot-info{color:var(--text2);}
+.lot-price{font-weight:700;font-family:var(--mono);color:var(--text);}
+.lot-profit{font-family:var(--mono);font-size:11px;}
 .detail-item{background:var(--bg);border-radius:9px;padding:9px 12px;}
 .detail-label{font-size:9px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:1px;}
 .detail-value{font-size:13px;font-weight:600;font-family:var(--mono);}
@@ -389,6 +396,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window._db=db; window._doc=doc; window._getDoc=getDoc; window._setDoc=setDoc;
+window._fbReady=true;
 window.dispatchEvent(new Event('fbReady'));
 </script>
 
@@ -487,10 +495,7 @@ async function doLogin(){
     const data=await fbLoad(name);
     if(!data.pw){showAuthError('존재하지 않는 계정이에요. 회원가입 해주세요!');return;}
     if(data.pw!==btoa(pw)){showAuthError('비밀번호가 틀렸어요');return;}
-    currentUser=name;
-    userStore={watchlist:data.watchlist||[],holdings:data.holdings||[]};
-    customStocks=data.customStocks||{};
-    enterApp();
+    enterApp(name, data);
   }catch(e){showAuthError('오류가 발생했어요. 다시 시도해주세요');}
 }
 async function doSignup(){
@@ -502,21 +507,29 @@ async function doSignup(){
     const data=await fbLoad(name);
     if(data.pw){showAuthError('이미 사용중인 닉네임이에요');return;}
     await fbSave(name,{pw:btoa(pw),watchlist:[],holdings:[],customStocks:{}});
-    currentUser=name; userStore={watchlist:[],holdings:[]}; customStocks={};
-    enterApp();
+    enterApp(name, {watchlist:[],holdings:[],customStocks:{}});
   }catch(e){showAuthError('오류가 발생했어요. 다시 시도해주세요');}
 }
 function showAuthError(msg){document.getElementById('auth-error').textContent=msg;}
-function enterApp(){
+function saveSession(u){localStorage.setItem('sx_sess',u);}
+function loadSession(){return localStorage.getItem('sx_sess');}
+function clearSession(){localStorage.removeItem('sx_sess');}
+
+function enterApp(name, data){
+  if(name) currentUser=name;
+  if(data){ userStore={watchlist:data.watchlist||[],holdings:data.holdings||[]}; customStocks=data.customStocks||{}; }
+  saveSession(currentUser);
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('user-chip').textContent='👤 '+currentUser;
+  renderWatchlist(); renderHoldings();
   loadAllPrices().then(()=>{renderWatchlist();renderHoldings();});
   startAutoRefresh();
 }
 function doLogout(){
   clearInterval(refreshTimer);
   if(isMini) toggleMini();
+  clearSession();
   currentUser=null; userStore={watchlist:[],holdings:[]};
   stockPrices={}; aiSummaries={}; customStocks={};
   document.getElementById('auth-screen').style.display='flex';
@@ -590,16 +603,19 @@ async function getAiSummary(code){
       })
     });
     const data=await res.json();
-    const text=data.content.map(i=>i.text||'').join('').trim();
-    aiSummaries[code]=text;
-    return text;
-  }catch{return null;}
+    const text=data.content.filter(i=>i.type==='text').map(i=>i.text).join('').trim();
+    if(text){ aiSummaries[code]=text; return text; }
+    return null;
+  }catch(e){ console.error('AI summary error',e); return null; }
 }
 async function loadAiSummary(code){
   const el=document.getElementById('ai-'+code); if(!el) return;
   el.textContent='🤖 분석 중...';
-  const summary=await getAiSummary(code);
-  if(el&&summary){el.textContent='🤖 '+summary;}
+  try{
+    const summary=await getAiSummary(code);
+    if(el&&summary) el.textContent='🤖 '+summary;
+    else if(el) el.textContent='🤖 요약을 가져올 수 없어요';
+  }catch(e){ if(el) el.textContent='🤖 오류 발생'; }
 }
 
 // ── ALERTS ──
@@ -646,9 +662,23 @@ async function removeFromWatchlist(code){
 }
 
 // ── HOLDINGS ──
+// lots 기반 합산 계산
+function calcHolding(h){
+  const lots = h.lots || [{buyPrice:h.buyPrice, qty:h.qty}];
+  const totalQty = lots.reduce((s,l)=>s+l.qty, 0);
+  const totalInvest = lots.reduce((s,l)=>s+l.buyPrice*l.qty, 0);
+  const avgPrice = totalInvest / totalQty;
+  return {lots, totalQty, totalInvest, avgPrice};
+}
+
 function renderHoldings(){
   let ti=0,te=0;
-  userStore.holdings.forEach(h=>{const d=stockPrices[h.code];ti+=h.buyPrice*h.qty;te+=(d?d.price:h.buyPrice)*h.qty;});
+  userStore.holdings.forEach(h=>{
+    const d=stockPrices[h.code];
+    const {totalQty,totalInvest}=calcHolding(h);
+    ti+=totalInvest;
+    te+=(d?d.price:totalInvest/totalQty)*totalQty;
+  });
   const tp=te-ti,tr=ti>0?((tp/ti)*100).toFixed(2):0;
   const has=userStore.holdings.length>0;
   document.getElementById('total-eval').textContent=has?fmt(te)+'원':'-';
@@ -665,10 +695,10 @@ function openModal(code,name,market){
   pendingCode=code;
   if(!STOCKS.find(x=>x.code===code)&&name){customStocks[code]={name,market:market||'KOSPI'};}
   const s=findStock(code);
-  document.getElementById('modal-stock-name').textContent=(s?.name||code)+' ('+code+')';
+  document.getElementById('modal-stock-name').textContent=(s?.name||name||code)+' ('+code+') — 매수 추가';
+  document.getElementById('modal-buy').value='';
+  document.getElementById('modal-qty').value='';
   const ex=userStore.holdings.find(h=>h.code===code);
-  document.getElementById('modal-buy').value=ex?ex.buyPrice:'';
-  document.getElementById('modal-qty').value=ex?ex.qty:'';
   document.getElementById('modal-target').value=ex?.target||'';
   document.getElementById('modal-overlay').classList.add('show');
   closeDD();
@@ -680,13 +710,34 @@ async function confirmHolding(){
   const target=parseInt(document.getElementById('modal-target').value)||null;
   if(!buy||!qty||buy<=0||qty<=0){alert('매입가와 수량을 올바르게 입력해주세요');return;}
   const idx=userStore.holdings.findIndex(h=>h.code===pendingCode);
-  if(idx>=0){userStore.holdings[idx]={...userStore.holdings[idx],buyPrice:buy,qty,target};}
-  else userStore.holdings.push({code:pendingCode,buyPrice:buy,qty,target});
+  if(idx>=0){
+    // 기존 종목 → lots에 추가
+    if(!userStore.holdings[idx].lots){
+      // 구버전 데이터 마이그레이션
+      userStore.holdings[idx].lots=[{buyPrice:userStore.holdings[idx].buyPrice,qty:userStore.holdings[idx].qty}];
+    }
+    userStore.holdings[idx].lots.push({buyPrice:buy,qty});
+    if(target!==null) userStore.holdings[idx].target=target;
+  } else {
+    // 새 종목 추가
+    userStore.holdings.push({code:pendingCode, lots:[{buyPrice:buy,qty}], target});
+  }
   await saveStore(); closeModal();
   const s=findStock(pendingCode);
-  fetchPrice(s.code,s.market).then(d=>{if(d)stockPrices[s.code]=d;renderHoldings();});
+  if(s) fetchPrice(s.code,s.market).then(d=>{if(d)stockPrices[s.code]=d;renderHoldings();});
+}
+
+async function removeLot(code, lotIdx){
+  const idx=userStore.holdings.findIndex(h=>h.code===code);
+  if(idx<0) return;
+  userStore.holdings[idx].lots.splice(lotIdx,1);
+  if(userStore.holdings[idx].lots.length===0){
+    userStore.holdings.splice(idx,1);
+  }
+  await saveStore(); renderHoldings();
 }
 async function removeHolding(code){
+  if(!confirm(findStock(code)?.name+' 전체 삭제하시겠어요?')) return;
   userStore.holdings=userStore.holdings.filter(h=>h.code!==code);
   await saveStore(); renderHoldings();
 }
@@ -730,83 +781,129 @@ function buildWatchCard(s,d){
 }
 
 function buildHoldingCard(s,d,h){
-  const cur=d?d.price:h.buyPrice;
-  const eval_=cur*h.qty,inv=h.buyPrice*h.qty,profit=eval_-inv;
-  const rate=((profit/inv)*100).toFixed(2);
-  const isUp=profit>=0;const cls=isUp?'up':'down';
+  const {lots,totalQty,totalInvest,avgPrice}=calcHolding(h);
+  const cur=d?d.price:avgPrice;
+  const evalAmt=cur*totalQty, profit=evalAmt-totalInvest;
+  const rate=((profit/totalInvest)*100).toFixed(2);
+  const isUp=profit>=0; const cls=isUp?'up':'down';
   const naver='https://finance.naver.com/item/main.naver?code='+s.code;
   const targetHit=h.target&&d&&d.price>=h.target;
-  return `<div class="stock-card${targetHit?' flash-up':''}">
+  const lotsId='lots-'+s.code;
+
+  const lotsHtml=lots.map((l,i)=>{
+    const lProfit=d?(d.price-l.buyPrice)*l.qty:0;
+    const lRate=((lProfit/((l.buyPrice||1)*l.qty))*100).toFixed(1);
+    const lCls=lProfit>=0?'up':'down';
+    return `<div class="lot-item">
+      <div class="lot-info">${l.qty}주 @ <span class="lot-price">${fmt(l.buyPrice)}원</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${d?`<span class="lot-profit ${lCls}">${lProfit>=0?'+':''}${fmt(lProfit)}원 (${lProfit>=0?'+':''}${lRate}%)</span>`:''}
+        <button class="btn-sm danger" onclick="event.stopPropagation();removeLot('${s.code}',${i})">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="stock-card${targetHit?' flash-up':''}" onclick="toggleLots('${lotsId}')">
     <div class="card-top">
       <div class="card-left">
         <div class="stock-icon">${s.name[0]}</div>
         <div>
           <div class="stock-name">${targetHit?'🎯 ':''}${s.name}</div>
-          <div class="stock-meta"><span>${s.code}</span><span class="badge ${s.market.toLowerCase()}">${s.market}</span><span>${h.qty}주 · 매입 ${fmt(h.buyPrice)}원</span>${h.target?`<span>목표 ${fmt(h.target)}원</span>`:''}</div>
+          <div class="stock-meta">
+            <span>${s.code}</span>
+            <span class="badge ${s.market.toLowerCase()}">${s.market}</span>
+            <span>총 ${totalQty}주 · 평균 ${fmt(Math.round(avgPrice))}원</span>
+            ${h.target?`<span>목표 ${fmt(h.target)}원</span>`:''}
+          </div>
         </div>
       </div>
       <div class="card-right-group">
         <div class="card-right">
-          <div class="stock-price">${fmt(eval_)}원</div>
+          <div class="stock-price">${fmt(evalAmt)}원</div>
           <div class="stock-change ${cls}">${isUp?'+':''}${fmt(profit)}원 (${isUp?'+':''}${rate}%)</div>
           ${d?`<div class="stock-change ${d.changeRate>=0?'up':'down'}">${d.changeRate>=0?'▲':'▼'} ${Math.abs(d.changeRate)}%</div>`:''}
         </div>
         <div class="card-actions">
-          <a class="btn-naver" href="${naver}" target="_blank">N</a>
-          <button class="btn-sm" onclick="openModal('${s.code}')">수정</button>
-          <button class="btn-sm danger" onclick="removeHolding('${s.code}')">삭제</button>
+          <a class="btn-naver" href="${naver}" target="_blank" onclick="event.stopPropagation()">N</a>
+          <button class="btn-sm" onclick="event.stopPropagation();openModal('${s.code}')">+ 추가</button>
+          <button class="btn-sm danger" onclick="event.stopPropagation();removeHolding('${s.code}')">전체삭제</button>
         </div>
       </div>
     </div>
-    <div class="card-detail open">
+    <div class="card-detail open" style="margin-top:10px">
       <div class="detail-item"><div class="detail-label">현재가</div><div class="detail-value">${fmt(cur)}</div></div>
-      <div class="detail-item"><div class="detail-label">평가금액</div><div class="detail-value">${fmt(eval_)}</div></div>
-      <div class="detail-item"><div class="detail-label">매입금액</div><div class="detail-value">${fmt(inv)}</div></div>
+      <div class="detail-item"><div class="detail-label">평가금액</div><div class="detail-value">${fmt(evalAmt)}</div></div>
+      <div class="detail-item"><div class="detail-label">매입금액</div><div class="detail-value">${fmt(totalInvest)}</div></div>
       <div class="detail-item"><div class="detail-label">수익률</div><div class="detail-value ${cls}">${isUp?'+':''}${rate}%</div></div>
+    </div>
+    <div class="lots-list" id="${lotsId}">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">📋 매수 내역 (${lots.length}건)</div>
+      ${lotsHtml}
     </div>
   </div>`;
 }
+
+function toggleLots(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
 function toggleDetail(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
 
-// ── SEARCH (종목코드 직접 입력 지원) ──
+// ── SEARCH (AI 기반 전종목 검색) ──
+let _sTmr=null;
 function searchStocks(q,ddId){
   const dd=document.getElementById(ddId);
+  clearTimeout(_sTmr);
   if(!q.trim()){dd.classList.remove('show');return;}
+  // 로컬 목록에서 먼저 빠르게
+  const local=STOCKS.filter(s=>s.name.includes(q)||s.code.includes(q)).slice(0,4);
   const isHold=ddId==='hold-dd';
-
-  // 리스트에서 검색
-  const res=STOCKS.filter(s=>s.name.includes(q)||s.code.includes(q)).slice(0,5);
-
-  // 6자리 숫자 코드 직접 입력 감지
-  const isDirectCode=/^\d{5,6}$/.test(q.trim());
-  const directCode=q.trim().padStart(6,'0');
-  const alreadyInList=STOCKS.find(x=>x.code===directCode);
-
-  let directHtml='';
-  if(isDirectCode&&!alreadyInList){
-    directHtml=`<div class="dropdown-item" onclick="${isHold?`openModal('${directCode}','${directCode}','KOSPI')`:`addToWatchlist('${directCode}','${directCode}','KOSPI')`}">
-      <div>
-        <div class="d-name">코드: ${directCode}</div>
-        <div class="d-meta">직접 입력 · KOSPI로 조회</div>
-      </div>
-      <button class="btn-sm"><span class="badge direct">직접입력</span></button>
-    </div>
-    <div class="dropdown-item" onclick="${isHold?`openModal('${directCode}','${directCode}','KOSDAQ')`:`addToWatchlist('${directCode}','${directCode}','KOSDAQ')`}">
-      <div>
-        <div class="d-name">코드: ${directCode}</div>
-        <div class="d-meta">직접 입력 · KOSDAQ으로 조회</div>
-      </div>
-      <button class="btn-sm"><span class="badge kosdaq">KOSDAQ</span></button>
-    </div>`;
+  if(local.length){
+    dd.innerHTML=local.map(s=>makeDdItem(s,isHold)).join('')+'<div style="padding:8px 16px;font-size:11px;color:var(--text3)">🔍 더 검색 중...</div>';
+    dd.classList.add('show');
+  } else {
+    dd.innerHTML='<div style="padding:12px 16px;font-size:12px;color:var(--text3)">🔍 검색 중...</div>';
+    dd.classList.add('show');
   }
+  // 코드 직접 입력
+  if(/^\d{5,6}$/.test(q.trim())){
+    const c=q.trim().padStart(6,'0');
+    dd.innerHTML=[{code:c,name:c+' (KOSPI)',market:'KOSPI'},{code:c,name:c+' (KOSDAQ)',market:'KOSDAQ'}].map(s=>makeDdItem(s,isHold)).join('');
+    return;
+  }
+  // AI 검색 (0.5초 디바운스)
+  _sTmr=setTimeout(()=>aiSearch(q,ddId,isHold,local),500);
+}
 
-  if(!res.length&&!directHtml){dd.classList.remove('show');return;}
-  dd.innerHTML=res.map(s=>`
-    <div class="dropdown-item" onclick="${isHold?`openModal('${s.code}')`:`addToWatchlist('${s.code}','${s.name}','${s.market}')`}">
-      <div><div class="d-name">${s.name}</div><div class="d-meta">${s.code} · <span class="badge ${s.market.toLowerCase()}">${s.market}</span></div></div>
-      <button class="btn-sm">${isHold?'+ 추가':'+ 관심'}</button>
-    </div>`).join('')+directHtml;
-  dd.classList.add('show');
+async function aiSearch(q,ddId,isHold,localRes){
+  const dd=document.getElementById(ddId);
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:600,
+        messages:[{role:'user',content:`한국 주식 종목 "${q}" 검색. JSON 배열만 응답. 설명 없이 JSON만. 없으면[]. 형식:[{"code":"6자리코드","name":"종목명","market":"KOSPI또는KOSDAQ"}] 최대8개`}]
+      })
+    });
+    const data=await res.json();
+    const txt=data.content.filter(i=>i.type==='text').map(i=>i.text).join('');
+    const m=txt.match(/\[[\s\S]*?\]/);
+    if(!m){
+      if(!localRes.length) dd.innerHTML='<div style="padding:12px 16px;font-size:12px;color:var(--text3)">검색 결과 없음</div>';
+      return;
+    }
+    const results=JSON.parse(m[0]);
+    // 중복 제거
+    const merged=[...results];
+    dd.innerHTML=merged.map(s=>makeDdItem(s,isHold)).join('');
+  }catch(e){
+    if(!localRes.length) dd.innerHTML='<div style="padding:12px 16px;font-size:12px;color:var(--text3)">검색 오류. 코드를 직접 입력해보세요</div>';
+  }
+}
+
+function makeDdItem(s,isHold){
+  const fn=isHold?`openModal('${s.code}','${s.name}','${s.market}')`:`addToWatchlist('${s.code}','${s.name}','${s.market}')`;
+  return `<div class="dropdown-item" onclick="${fn}">
+    <div><div class="d-name">${s.name}</div><div class="d-meta">${s.code} · <span class="badge ${s.market.toLowerCase()}">${s.market}</span></div></div>
+    <button class="btn-sm">${isHold?'+ 추가':'+ 관심'}</button>
+  </div>`;
 }
 function closeDD(){
   document.querySelectorAll('.dropdown').forEach(d=>d.classList.remove('show'));
@@ -833,7 +930,9 @@ async function searchNews(){
     });
     const data=await res.json();
     const text=data.content.map(i=>i.text||'').join('');
-    const news=JSON.parse(text.replace(/```json|```/g,'').trim());
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if(!jsonMatch) throw new Error('JSON not found');
+    const news=JSON.parse(jsonMatch[0]);
     container.innerHTML=news.map(n=>`
       <div class="news-card ${n.sentiment}">
         <div class="news-header">
@@ -867,6 +966,18 @@ function toggleMini(){
 function fmt(n){return Math.round(n).toLocaleString('ko-KR');}
 function fmtVol(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(0)+'K';return n?.toString()||'-';}
 function emptyState(icon,title,desc){return`<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-title">${title}</div><div class="empty-desc">${desc}</div></div>`;}
+
+// ── 세션 복원 ──
+window.addEventListener('fbReady', async()=>{
+  const saved = loadSession();
+  if(saved){
+    try{
+      const data = await fbLoad(saved);
+      if(data && data.pw){ currentUser=saved; enterApp(saved, data); }
+      else clearSession();
+    }catch(e){ clearSession(); }
+  }
+});
 </script>
 </body>
 </html>
