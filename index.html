@@ -825,13 +825,12 @@ function buildHoldingCard(s,d,h){
     <div class="card-top">
       <div class="card-left">
         <div class="stock-icon">${s.name[0]}</div>
-        <div>
+        <div class="card-info">
           <div class="stock-name">${targetHit?'🎯 ':''}${s.name}</div>
           <div class="stock-meta">
-            <span>${s.code}</span>
-            <span class="badge ${s.market.toLowerCase()}">${s.market}</span>
-            <span>총 ${totalQty}주 · 평균 ${fmt(Math.round(avgPrice))}원</span>
-            ${h.target?`<span>목표 ${fmt(h.target)}원</span>`:''}
+            ${s.code} · ${s.market}<br>
+            총 ${totalQty}주 · 평균 ${fmt(Math.round(avgPrice))}원
+            ${h.target?` · 목표 ${fmt(h.target)}원`:''}
           </div>
         </div>
       </div>
