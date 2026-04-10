@@ -199,6 +199,7 @@ async function searchStocks(query) {
     {code:'196170',name:'알테오젠',market:'KOSDAQ'},{code:'087010',name:'펩트론',market:'KOSDAQ'},
     {code:'204840',name:'지투지바이오',market:'KOSDAQ'},{code:'468530',name:'프로티나',market:'KOSDAQ'},
     {code:'277810',name:'레인보우로보틱스',market:'KOSDAQ'},{code:'141080',name:'리가켐바이오',market:'KOSDAQ'},
+    {"code":"298380","name":"이뮨온시아","market":"KOSDAQ"},    
   ];
   const local = KR_DB.filter(s => s.name.includes(q));
   if (local.length > 0) return local.slice(0, 8);
